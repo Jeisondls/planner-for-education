@@ -2,9 +2,9 @@
 
 Plataforma para docentes que genera planificaciones, situaciones de aprendizaje e instrumentos de evaluación con apoyo de IA, alineados al currículo oficial. Incluye app móvil, versión web y un backend propio sobre Odoo.
 
-**Sitio:** [plannerforeducation.com](https://plannerforeducation.com) · **App web:** [app.plannerforeducation.com](https://app.plannerforeducation.com)
+**Sitio:** [plannerforeducation.com](https://plannerforeducation.com)
 
-> El código fuente es privado porque es un producto comercial. Estos repositorios documentan el problema, la arquitectura y las decisiones técnicas de cada parte.
+> El código fuente es privado porque es un producto comercial. Estos repositorios documentan el problema y las decisiones de diseño a alto nivel, sin detalles de configuración ni de negocio.
 
 ## El problema
 
@@ -14,48 +14,44 @@ Preparar planificaciones, rúbricas y pruebas toma muchas horas a los docentes, 
 
 | Parte | Qué resuelve | Repositorio |
 |---|---|---|
-| **App móvil** | Planificar y generar documentos desde el teléfono, con acceso seguro y suscripción | [planner-mobile](https://github.com/Jeisondls/planner-mobile) |
-| **Versión web** | La misma app en el navegador, con interfaz adaptada a escritorio | [planner-web](https://github.com/Jeisondls/planner-web) |
-| **Backend Odoo** | Generación con IA, licencias, WhatsApp, CRM, ventas, facturación y cobro | [planner-odoo-backend](https://github.com/Jeisondls/planner-odoo-backend) |
-| **Infraestructura** | Docker, PostgreSQL, Nginx y TLS | [planner-docker-infra](https://github.com/Jeisondls/planner-docker-infra) |
+| **App móvil** | Planificar y generar documentos desde el teléfono | [planner-mobile](https://github.com/Jeisondls/planner-mobile) |
+| **Versión web** | La misma app en el navegador | [planner-web](https://github.com/Jeisondls/planner-web) |
+| **Backend** | Generación con IA, usuarios, suscripciones y facturación | [planner-odoo-backend](https://github.com/Jeisondls/planner-odoo-backend) |
+| **Infraestructura** | Despliegue en contenedores | [planner-docker-infra](https://github.com/Jeisondls/planner-docker-infra) |
 
 ## Arquitectura general
 
 ```mermaid
 flowchart LR
     subgraph Cliente
-        M[App móvil<br/>React Native + Expo]
-        W[Web<br/>React Native Web]
+        M[App móvil]
+        W[Web]
     end
-    subgraph Servidor["Servidor (Docker Compose)"]
-        N[Nginx + TLS]
-        O[Odoo<br/>módulos propios]
-        Q[Cola de tareas<br/>generaciones con IA]
-        D[(PostgreSQL)]
+    subgraph Servidor
+        A[Backend]
+        Q[Tareas en segundo plano]
+        D[(Base de datos)]
     end
-    M & W --> N --> O
-    O <--> D
+    M & W --> A
+    A <--> D
     Q <--> D
-    Q --> IA[Gemini / Claude]
-    O <--> WA[WhatsApp Business<br/>Cloud API]
-    GP[Google Play<br/>Billing y avisos] --> O
-    ID[Google / Microsoft<br/>inicio de sesión] --> O
+    Q --> IA[Proveedor de IA]
 ```
 
-## Retos principales y cómo los resolví
+## Retos principales y enfoque
 
-| Reto | Solución |
+| Reto | Enfoque |
 |---|---|
-| Las generaciones con IA tardan y pueden saturar el servidor | Cola asíncrona en un proceso aparte, con estados y tope de recursos |
-| Los documentos deben seguir el currículo oficial | Catálogos curriculares como datos y generación con el contexto del currículo |
-| Una sola base de código para móvil y web | Expo con React Native Web y componentes específicos de escritorio |
-| Cobrar suscripciones y mantener las licencias al día | Google Play Billing verificado en el servidor, con avisos y facturas en Odoo |
-| Acceso seguro sin depender solo de contraseñas | Passkeys, verificación en dos pasos, biometría y OAuth |
-| Operar con pocos recursos | Contenedores con límites, healthchecks y actualizaciones OTA |
+| Las generaciones con IA tardan y pueden saturar el servidor | Procesamiento asíncrono en un proceso aparte, con recursos acotados |
+| Los documentos deben seguir el currículo oficial | Catálogos curriculares como datos y generación con ese contexto |
+| Una sola base de código para móvil y web | React Native con soporte web |
+| Cobrar suscripciones y mantener el acceso al día | Integración con las tiendas de aplicaciones y facturación en el backend |
+| Acceso seguro sin depender solo de contraseñas | Autenticación moderna con factores adicionales |
+| Operar con pocos recursos | Contenedores con límites y actualizaciones remotas de la app |
 
 ## Tecnologías
 
-Odoo · Python · PostgreSQL · Docker · Nginx · React Native · Expo · TypeScript · TanStack Query · Google Play Billing · WhatsApp Cloud API · Gemini · Claude
+Odoo · Python · PostgreSQL · Docker · React Native · Expo · TypeScript
 
 ## Autor
 
